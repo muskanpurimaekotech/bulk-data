@@ -29,10 +29,4 @@ public class Record {
     @PositiveOrZero(message = "Age cannot be negative")
     private int age;
     
-    public Record(String name, String email, int age) {
-        this.name = name;
-        this.email = email;
-        this.age = age;
-    }
-
 }

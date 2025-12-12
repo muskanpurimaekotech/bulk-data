@@ -30,20 +30,17 @@ public class ExcelHelper {
 
                 if (rowNumber == 0) {
                     rowNumber++;
-                    continue; // Skip header
+                    continue;
                 }
 
                 Record record = new Record();
 
-                // Name
                 Cell nameCell = currentRow.getCell(0);
                 record.setName(nameCell != null ? nameCell.getStringCellValue().trim() : null);
 
-                // Email (null-safe)
                 Cell emailCell = currentRow.getCell(1);
                 record.setEmail(emailCell != null ? emailCell.getStringCellValue().trim() : null);
 
-                // Age
                 Cell ageCell = currentRow.getCell(2);
                 record.setAge(ageCell != null ? (int) ageCell.getNumericCellValue() : null);
 
@@ -54,7 +51,7 @@ public class ExcelHelper {
             return records;
 
         } catch (Exception e) {
-            throw new RuntimeException("Excel पढ़ने में समस्या: " + e.getMessage());
+            throw new RuntimeException("Excel read issue: " + e.getMessage());
         }
     }
 

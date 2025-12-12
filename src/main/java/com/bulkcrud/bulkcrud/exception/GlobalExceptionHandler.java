@@ -16,7 +16,6 @@ import java.util.Set;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle @Valid validation errors for @RequestBody (single record)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
@@ -35,7 +34,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle Hibernate/JPA validation errors during persist
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, Object> errors = new HashMap<>();
@@ -53,7 +51,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // Fallback for other exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleOtherExceptions(Exception ex) {
         Map<String, String> error = new HashMap<>();

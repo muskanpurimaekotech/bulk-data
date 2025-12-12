@@ -28,18 +28,15 @@ public class RecordService {
         this.validator = validator;
     }
 
-    // JSON Bulk
     public Map<String, Object> saveAll(List<Record> records) {
         return processBulk(records);
     }
 
-    // Excel Bulk
     public Map<String, Object> saveExcelData(InputStream is) {
         List<Record> records = ExcelHelper.excelToRecords(is);
         return processBulk(records);
     }
 
-    // ------------------ BULK PROCESSING (Reusable) ------------------
     private Map<String, Object> processBulk(List<Record> records) {
 
         if (records == null || records.isEmpty()) {
@@ -59,13 +56,11 @@ public class RecordService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All emails are null or blank");
         }
 
-        // Extract distinct emails for DB check
         List<String> requestEmails = cleanedRecords.stream()
                 .map(Record::getEmail)
                 .distinct()
                 .toList();
 
-        // Fetch existing records from DB in one query
         List<Record> existingDB = recordRepository.findAllByEmailIn(requestEmails);
         Set<String> existingEmails = existingDB.stream()
                 .map(Record::getEmail)
@@ -73,20 +68,17 @@ public class RecordService {
 
         for (Record r : records) {
 
-            // 1) Validate entity fields (including required email)
             Set<ConstraintViolation<Record>> violations = validator.validate(r);
             if (!violations.isEmpty()) {
                 invalid.add(errorResponse(r, violations));
-                continue; // move to next record
+                continue; 
             }
 
-            // 2) Check duplicate in request
             if (!seenInRequest.add(r.getEmail())) {
                 invalid.add(errorSimple(r, "Duplicate email in request"));
                 continue;
             }
 
-            // 3) Check duplicate in DB
             if (existingEmails.contains(r.getEmail())) {
                 invalid.add(errorSimple(r, "Email already exists in database"));
                 continue;
@@ -96,10 +88,8 @@ public class RecordService {
         }
 
 
-        // Save valid records
         List<Record> saved = recordRepository.saveAll(valid);
 
-        // Prepare response
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("savedCount", saved.size());
         response.put("invalidCount", invalid.size());
@@ -128,7 +118,6 @@ public class RecordService {
         );
     }
 
-    // ------------------ NORMAL CRUD ------------------
 
     public List<Record> getAll() {
         return recordRepository.findAll();
@@ -147,12 +136,10 @@ public class RecordService {
 
     public Record update(Long id, Record updatedRecord) {
 
-        // 1️⃣ Fetch existing record by ID
         Record existingRecord = recordRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Record with id " + id + " not found"));
 
-        // 2️⃣ Validate updated record fields
         Set<ConstraintViolation<Record>> violations = validator.validate(updatedRecord);
         if (!violations.isEmpty()) {
             throw new ResponseStatusException(
@@ -161,11 +148,9 @@ public class RecordService {
             );
         }
 
-        // 3️⃣ Check email existence in DB
         recordRepository.findByEmail(updatedRecord.getEmail())
             .ifPresent(existing -> {
 
-                // ✅ Case: Same ID and same data
             	if (existing.getId().equals(id) &&
             		    existing.getName().equals(updatedRecord.getName()) &&
             		    existing.getAge() == updatedRecord.getAge()) {  // <- use ==
@@ -174,19 +159,16 @@ public class RecordService {
             		}
 
 
-                // ✅ Case: Same email in different ID
                 if (!existing.getId().equals(id)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "Email already exists: " + updatedRecord.getEmail());
                 }
             });
 
-        // 4️⃣ Update record fields
         existingRecord.setName(updatedRecord.getName());
         existingRecord.setEmail(updatedRecord.getEmail());
         existingRecord.setAge(updatedRecord.getAge());
 
-        // 5️⃣ Save updated record
         return recordRepository.save(existingRecord);
     }
 

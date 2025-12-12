@@ -22,7 +22,6 @@ public class RecordController {
         this.recordService = recordService;
     }
 
- // BULK JSON UPLOAD
     @PostMapping("/bulk")
     public ResponseEntity<?> addRecords(@RequestBody  List<Record> records) {
 
@@ -37,7 +36,6 @@ public class RecordController {
         ));
     }
 
-    // EXCEL UPLOAD
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file) {
 
@@ -62,13 +60,11 @@ public class RecordController {
     }
 
 
-    // ⭐ GET ALL NORMAL (NO PAGINATION)
     @GetMapping
     public ResponseEntity<List<Record>> getAllRecords() {
         return ResponseEntity.ok(recordService.getAll());
     }
 
-    // ⭐ DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecord(@PathVariable Long id) {
         recordService.deleteById(id);
@@ -78,7 +74,6 @@ public class RecordController {
         ));
     }
 
-    // ⭐ UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRecord(
             @PathVariable Long id,
@@ -93,8 +88,6 @@ public class RecordController {
     }
 
     
-
-    // ⭐ PAGINATION FOR BULK VIEW
     @GetMapping("/paginated")
     public ResponseEntity<?> getRecords(
             @RequestParam(defaultValue = "0") int page,
